@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Applicaster Store Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface2: #1a1a26;
+      --border: rgba(255,255,255,0.07);
+      --accent: #6c63ff;
+      --accent2: #ff6b6b;
+      --accent3: #43e097;
+      --text: #f0f0f5;
+      --text-muted: #7a7a99;
+      --text-dim: #4a4a66;
+      --glow: rgba(108, 99, 255, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(108,99,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(108,99,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      background: rgba(10,10,15,0.85);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .logo span { color: var(--text-muted); font-weight: 400; margin-left: 4px; }
+
+    .store-pills {
+      display: flex;
+      gap: 6px;
+    }
+
+    .pill {
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+    }
+
+    .pill:hover, .pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--glow);
+    }
+
+    /* Main layout */
+    .app {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 24px;
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sidebar-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .sidebar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+    }
+
+    .store-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      width: 100%;
+      text-align: left;
+      transition: all 0.2s;
+      margin-bottom: 2px;
+    }
+
+    .store-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .store-btn.active {
+      background: var(--glow);
+      color: var(--accent);
+      border: 1px solid rgba(108,99,255,0.3);
+    }
+
+    .store-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .quick-btn {
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quick-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+      border-color: rgba(108,99,255,0.3);
+    }
+
+    /* Chat area */
+    .chat-area {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      height: calc(100vh - 112px);
+    }
+
+    .chat-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-header-left h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .chat-header-left p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent3);
+      box-shadow: 0 0 8px var(--accent3);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Messages */
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+
+    .messages::-webkit-scrollbar { width: 4px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
+    .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .message {
+      display: flex;
+      gap: 12px;
+      animation: fadeUp 0.3s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+      flex-direction: row-reverse;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .avatar.agent {
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      color: white;
+    }
+
+    .avatar.user {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .bubble {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .message.agent .bubble {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-top-left-radius: 4px;
+      color: var(--text);
+    }
+
+    .message.user .bubble {
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      border-top-right-radius: 4px;
+      color: white;
+    }
+
+    .bubble h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .bubble p { margin-bottom: 8px; }
+    .bubble p:last-child { margin-bottom: 0; }
+
+    .bubble ul {
+      margin: 8px 0 8px 16px;
+    }
+
+    .bubble ul li {
+      margin-bottom: 4px;
+    }
+
+    .bubble a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .bubble a:hover { text-decoration: underline; }
+
+    .bubble code {
+      background: rgba(108,99,255,0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #a78bfa;
+    }
+
+    .bubble strong { color: var(--text); font-weight: 500; }
+
+    /* Step badges */
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(67,224,151,0.1);
+      border: 1px solid rgba(67,224,151,0.3);
+      color: var(--accent3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    /* Typing indicator */
+    .typing {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+    }
+
+    .typing span {
+      width: 6px;
+      height: 6px;
+      background: var(--text-dim);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-6px); }
+    }
+
+    /* Input area */
+    .input-area {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .input-wrap {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrap:focus-within {
+      border-color: rgba(108,99,255,0.4);
+    }
+
+    textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      resize: none;
+      min-height: 20px;
+      max-height: 120px;
+      line-height: 1.5;
+    }
+
+    textarea::placeholder { color: var(--text-dim); }
+
+    .send-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: opacity 0.2s, transform 0.1s;
+      font-size: 16px;
+    }
+
+    .send-btn:hover { opacity: 0.9; transform: scale(1.05); }
+    .send-btn:active { transform: scale(0.95); }
+    .send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    /* Welcome state */
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 40px;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .welcome-icon {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 20px 60px rgba(108,99,255,0.3);
+    }
+
+    .welcome h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .welcome p {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 400px;
+      line-height: 1.6;
+    }
+
+    .welcome-prompts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      max-width: 560px;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .prompt-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .prompt-card:hover {
+      border-color: rgba(108,99,255,0.4);
+      background: rgba(108,99,255,0.05);
+      transform: translateY(-2px);
+    }
+
+    .prompt-card .prompt-label {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .prompt-card p {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* Context bar */
+    .context-bar {
+      padding: 8px 24px;
+      background: rgba(108,99,255,0.05);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .context-tag {
+      background: var(--glow);
+      border: 1px solid rgba(108,99,255,0.3);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .app { grid-template-columns: 1fr; padding: 12px; }
+      .sidebar { display: none; }
+      header { padding: 0 16px; }
+      .store-pills { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    Applicaster <span>Store Agent</span>
+  </div>
+  <div class="store-pills">
+    <button class="pill" onclick="selectStore('apple')">Apple</button>
+    <button class="pill" onclick="selectStore('google')">Google Play</button>
+    <button class="pill" onclick="selectStore('amazon')">Fire TV</button>
+    <button class="pill" onclick="selectStore('roku')">Roku</button>
+    <button class="pill" onclick="selectStore('samsung')">Samsung</button>
+    <button class="pill" onclick="selectStore('lg')">LG</button>
+  </div>
+</header>
+
+<div class="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">App Stores</div>
+      <button class="store-btn" onclick="selectStore('apple')" id="btn-apple">
+        <div class="store-icon" style="background:#1a1a2e;">🍎</div>
+        Apple (iOS / tvOS)
+      </button>
+      <button class="store-btn" onclick="selectStore('google')" id="btn-google">
+        <div class="store-icon" style="background:#0f2027;">▶️</div>
+        Google Play
+      </button>
+      <button class="store-btn" onclick="selectStore('amazon')" id="btn-amazon">
+        <div class="store-icon" style="background:#1a1200;">🔥</div>
+        Amazon Fire TV
+      </button>
+      <button class="store-btn" onclick="selectStore('roku')" id="btn-roku">
+        <div class="store-icon" style="background:#0d1a1d;">📺</div>
+        Roku Channel Store
+      </button>
+      <button class="store-btn" onclick="selectStore('samsung')" id="btn-samsung">
+        <div class="store-icon" style="background:#001225;">🌀</div>
+        Samsung TV
+      </button>
+      <button class="store-btn" onclick="selectStore('lg')" id="btn-lg">
+        <div class="store-icon" style="background:#1a0014;">🖥️</div>
+        LG TV
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Quick Help</div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="sendQuickPrompt('What assets and screenshots do I need to prepare?')">
+          🖼️ Asset requirements
+        </button>
+        <button class="quick-btn" onclick="sendQuickPrompt('Help me write app metadata: title, description, and keywords.')">
+          ✍️ Write my metadata
+        </button>
+        <button class="quick-btn" onclick="sendQuickPrompt('My app was rejected. How do I troubleshoot?')">
+          ⚠️ Troubleshoot rejection
+        </button>
+        <button class="quick-btn" onclick="sendQuickPrompt('Walk me through opening a developer account step by step.')">
+          👤 Open developer account
+        </button>
+        <button class="quick-btn" onclick="sendQuickPrompt('What are all the steps from start to submission?')">
+          📋 Full submission checklist
+        </button>
+        <button class="quick-btn" onclick="sendQuickPrompt('What certificates or credentials do I need to share with Applicaster?')">
+          🔐 Certificates & credentials
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-section" style="background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(168,85,247,0.05)); border-color: rgba(108,99,255,0.2);">
+      <div class="sidebar-title" style="color: var(--accent);">Built on Zapp</div>
+      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">This agent knows all Applicaster & Zapp requirements for every store. Ask anything about submitting your app.</p>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-area" id="chatArea">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <h2>App Store Submission Agent</h2>
+        <p id="contextLabel">Select a store or ask a question to get started</p>
+      </div>
+      <div class="status-dot"></div>
+    </div>
+
+    <div id="contextBar" style="display:none;" class="context-bar">
+      <span>Context:</span>
+      <span class="context-tag" id="contextTag"></span>
+      <button onclick="clearContext()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:11px;margin-left:auto;">✕ clear</button>
+    </div>
+
+    <!-- Welcome / messages container -->
+    <div class="messages" id="messages">
+      <div class="welcome" id="welcomeScreen">
+        <div class="welcome-icon">🚀</div>
+        <div>
+          <h2>Ready to launch your app?</h2>
+          <p>I'm your Applicaster store submission expert. I'll guide you through every step — from opening a developer account to getting your app approved.</p>
+        </div>
+        <div class="welcome-prompts">
+          <div class="prompt-card" onclick="sendQuickPrompt('I want to submit my app to the Apple App Store for the first time. Where do I start?')">
+            <div class="prompt-label">Apple</div>
+            <p>First-time iOS/tvOS submission guide</p>
+          </div>
+          <div class="prompt-card" onclick="sendQuickPrompt('I want to publish my app on Google Play and Android TV. Walk me through it.')">
+            <div class="prompt-label">Google Play</div>
+            <p>Android & Android TV walkthrough</p>
+          </div>
+          <div class="prompt-card" onclick="sendQuickPrompt('What do I need to prepare before submitting to any app store? Give me a full checklist.')">
+            <div class="prompt-label">All Stores</div>
+            <p>Universal pre-launch checklist</p>
+          </div>
+          <div class="prompt-card" onclick="sendQuickPrompt('My app was rejected by the store. Help me figure out why and how to fix it.')">
+            <div class="prompt-label">Troubleshoot</div>
+            <p>Diagnose & resolve rejections</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea
+          id="input"
+          placeholder="Ask about any store, step, asset requirement, or issue…"
+          rows="1"
+          onkeydown="handleKey(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+      </div>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">↑</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 🔑 Replace this with your Anthropic API key from https://console.anthropic.com
+  const ANTHROPIC_API_KEY = 'sk-ant-YOUR-KEY-HERE';
+
+  let conversationHistory = [];
+  let selectedStore = null;
+  const storeNames = {
+    apple: 'Apple App Store (iOS & tvOS)',
+    google: 'Google Play & Android TV',
+    amazon: 'Amazon Fire TV',
+    roku: 'Roku Channel Store',
+    samsung: 'Samsung TV',
+    lg: 'LG TV'
+  };
+
+  const SYSTEM_PROMPT = `You are the Applicaster App Store Submission Agent — a specialized expert assistant built by Applicaster to help customers submit their streaming apps (built on Zapp) to app stores.
+
+Your expertise covers all six stores:
+1. **Apple App Store** (iOS & tvOS) — Apple Developer Program, App Store Connect, Bundle IDs, Provisioning Profiles, Distribution Certificates, p8 API keys, screenshots (6.7", 6.5", 5.5" iPhone; 12.9" iPad; 1920x1080 Apple TV), metadata limits, review guidelines, App Tracking Transparency
+2. **Google Play / Android TV** — Google Play Console, Application ID, keystore file, store password, key alias & key password, AAB format (required since 2021), screenshots, feature graphic (1024x500), Play Policy compliance
+3. **Amazon Fire TV** — Amazon Developer account, shares keystore/credentials with Android TV, Amazon Appstore guidelines, Fire TV-specific screenshots & assets
+4. **Roku Channel Store** — Roku Customer account, Roku Developer Program, Developer Package, Developer ID & password (new apps → contact Applicaster CS rep), channel poster (540x405), channel banner (2560x1440), Roku direct publisher or SceneGraph
+5. **Samsung TV (Tizen)** — Samsung Developer Program, Samsung Seller Office, Partner Seller membership for outside US, p12 certificate & password, Package ID, Tizen packaging, seller registration
+6. **LG TV (webOS)** — LG Developer Program, LG App Partner registration (partner.lge.com), LG Seller Lounge, app submission for Smart TV distribution
+
+Your Applicaster-specific knowledge:
+- After submission, **Applicaster manages the build & upload process** — the customer must provide required credentials/certificates to Applicaster (to stores@applicaster.com)
+- For **new Roku apps**, customers must contact their Applicaster CS representative to obtain credentials
+- Firebase is often required for analytics — customers must grant access to stores@applicaster.com
+- Applicaster's Zapp platform uses React Native (Quick Brick) — builds are generated and uploaded by Applicaster's team
+- Customers own their developer accounts; Applicaster does not own the accounts
+- Support contacts: Americas → usteam@applicaster.com | EMEA → team2@applicaster.com
+- Ticketing: applicaster.monday.com
+
+Your behavior:
+- Be a warm, expert guide — not a bot. Speak like a knowledgeable colleague.
+- Give step-by-step structured guidance when walking through processes.
+- Always flag what the customer does vs what Applicaster handles.
+- For asset/screenshot specs, be specific about pixel dimensions and file formats.
+- For metadata, offer to help write or improve it.
+- For rejections, ask for the rejection message and diagnose specifically.
+- When a store is specified, focus on that store. Otherwise, ask which store or cover all relevant ones.
+- Keep answers clear and actionable. Use numbered steps, bold key terms, and link to official resources when helpful.
+- Never make up information. If unsure, say so and suggest contacting the Applicaster CS team.`;
+
+  function selectStore(store) {
+    selectedStore = store;
+    // Update UI
+    document.querySelectorAll('.store-btn, .pill').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('btn-' + store);
+    if (btn) btn.classList.add('active');
+    document.querySelectorAll('.pill').forEach(p => {
+      if (p.textContent.toLowerCase().includes(store) || 
+          (store === 'apple' && p.textContent === 'Apple') ||
+          (store === 'google' && p.textContent === 'Google Play') ||
+          (store === 'amazon' && p.textContent === 'Fire TV') ||
+          (store === 'roku' && p.textContent === 'Roku') ||
+          (store === 'samsung' && p.textContent === 'Samsung') ||
+          (store === 'lg' && p.textContent === 'LG')) {
+        p.classList.add('active');
+      }
+    });
+    const name = storeNames[store];
+    document.getElementById('contextLabel').textContent = `Focused on: ${name}`;
+    document.getElementById('contextBar').style.display = 'flex';
+    document.getElementById('contextTag').textContent = name;
+  }
+
+  function clearContext() {
+    selectedStore = null;
+    document.querySelectorAll('.store-btn, .pill').forEach(b => b.classList.remove('active'));
+    document.getElementById('contextBar').style.display = 'none';
+    document.getElementById('contextLabel').textContent = 'Select a store or ask a question to get started';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  function sendQuickPrompt(text) {
+    document.getElementById('input').value = text;
+    sendMessage();
+  }
+
+  function hideWelcome() {
+    const w = document.getElementById('welcomeScreen');
+    if (w) w.remove();
+  }
+
+  function appendMessage(role, content) {
+    hideWelcome();
+    const messages = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = `message ${role}`;
+    
+    const avatar = document.createElement('div');
+    avatar.className = `avatar ${role}`;
+    avatar.textContent = role === 'agent' ? '⚡' : '👤';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = formatMessage(content);
+
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    return div;
+  }
+
+  function showTyping() {
+    hideWelcome();
+    const messages = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'message agent';
+    div.id = 'typing-indicator';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar agent';
+    avatar.textContent = '⚡';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function hideTyping() {
+    const t = document.getElementById('typing-indicator');
+    if (t) t.remove();
+  }
+
+  function formatMessage(text) {
+    // Convert markdown-ish to HTML
+    return text
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^# (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^\d+\. (.+)$/gm, (_, p) => `<li>${p}</li>`)
+      .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul style="list-style:decimal;margin-left:18px;">${m}</ul>`)
+      .replace(/^[-•] (.+)$/gm, (_, p) => `<li>${p}</li>`)
+      .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul style="margin-left:18px;">${m}</ul>`)
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>')
+      .replace(/^(.+)$/, '<p>$1</p>');
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    input.style.height = 'auto';
+    document.getElementById('sendBtn').disabled = true;
+
+    appendMessage('user', text);
+
+    // Build message with store context
+    let userMessage = text;
+    if (selectedStore) {
+      userMessage = `[User is focused on: ${storeNames[selectedStore]}]\n\n${text}`;
+    }
+
+    conversationHistory.push({ role: 'user', content: userMessage });
+    showTyping();
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: SYSTEM_PROMPT,
+          messages: conversationHistory
+        })
+      });
+
+      const data = await response.json();
+      hideTyping();
+
+      const reply = data.content?.[0]?.text || "I'm having trouble responding right now. Please try again or contact support@applicaster.com.";
+      conversationHistory.push({ role: 'assistant', content: reply });
+      appendMessage('agent', reply);
+    } catch (err) {
+      hideTyping();
+      appendMessage('agent', "I'm having trouble connecting right now. Please try again or reach out to the Applicaster support team at **usteam@applicaster.com** (Americas) or **team2@applicaster.com** (EMEA).");
+    }
+
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('input').focus();
+  }
+</script>
+</body>
+</html>
